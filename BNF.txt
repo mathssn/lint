@@ -1,0 +1,43 @@
+<start> ::= { <function> | <class> }
+
+<block> ::= "{" { <statement> } "}"
+
+<statement> ::= <declaration> | <assignment> | <ifStmt> | <repeatStmt> | <loopStmt> | "return" <expr> ";" | "break;" | "continue;" | <expr> ";" 
+
+<declaration> ::= "var" <var> <declaration_sulf>";"
+<declaration_sulf> ::= ":" <type> "=" <expr> | ":" <type> | "=" <expr>
+<assignment> ::= <var> "=" <expr> ";"
+<ifStmt> ::= "if" "(" <logicExpr> ")" <block> { "else if" "(" <logicExpr> ")" <block>} [ "else" <block> ]
+<repeatStmt> ::= "repeat" "(" "var" <var>";" <int> "to" <int>")" <block> | "repeat" "(" "var" <var> ":" "int" from <int> "to" <int>" "step" <int>)" <block>
+<loopStmt> ::= "loop" "if" "(" <logicExpr> ")" <block>
+
+<function> ::= "func" <word>"("[ <param> {"," <param>} ]"):" ( <type> | "void" ) <block>
+<param> ::= <var> ":" <type>
+
+<type> ::= "int" | "float" | "bool" | "char"
+
+<class> ::= "class" <word> "{" { <declaration> | <function> | <constructor> } "}"
+<constructor> = "_new" "("[ <param> {"," <param>} ]")" <block>
+
+<logicExpr> ::= <logicTerm> {("&&" | "||") <logicTerm>}
+<logicTerm> ::= <expr> <logicOperator> <expr> | <bool> 
+
+<number> ::= <digit> { <digit> }
+<digit> ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
+
+<int> ::= <number>
+<float> ::= <int>"."<number>
+<bool> ::= "True" | "False"
+
+<var> ::= <word>
+<word> ::= <char> { <char> | <digit> }
+<char> ::= "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z" | "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z" | "_"
+<charLiteral> ::= "'" <char> "'"
+
+<logicOperator> ::= ">" | "<" | "==" | ">=" | "<=" 
+
+<expr> ::= <term> { (+ | -) <term> }
+<term> ::= <factor> { (* | /) <factor> }
+<factor> ::= (<expr>) | <int> | <float> | <bool> | <charLiteral> | "null" | <var> | -<factor> | <functionCall>
+
+<functionCall> ::= <var> "(" [ <expr> {"," <expr> }] ")" | <var> "." <var> "(" [ <expr> {"," <expr> }] ")"
