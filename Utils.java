@@ -48,4 +48,15 @@ public class Utils {
         }
         return false;
     }
+
+    public static boolean compare(String a, String b) {
+        if (a == null || b == null) {
+            return false;
+        }
+
+        if (a.equals(b)) {
+            return true;
+        }
+        return false;
+    }
 }

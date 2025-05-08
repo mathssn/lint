@@ -8,7 +8,7 @@
 <declaration_sulf> ::= ":" <type> "=" <expr> | ":" <type> | "=" <expr>
 <assignment> ::= <var> "=" <expr> ";"
 <ifStmt> ::= "if" "(" <logicExpr> ")" <block> { "else if" "(" <logicExpr> ")" <block>} [ "else" <block> ]
-<repeatStmt> ::= "repeat" "(" "var" <var>";" <int> "to" <int>")" <block> | "repeat" "(" "var" <var> ":" "int" from <int> "to" <int>" "step" <int>)" <block>
+<repeatStmt> ::= "repeat" "(" "var" <var>";" <expr> "to" <expr>")" <block> | "repeat" "(" "var" <var> ":" "int" from <int> "to" <int>" "step" <int>)" <block>
 <loopStmt> ::= "loop" "if" "(" <logicExpr> ")" <block>
 
 <function> ::= "func" <word>"("[ <param> {"," <param>} ]"):" ( <type> | "void" ) <block>

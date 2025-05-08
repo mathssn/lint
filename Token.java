@@ -39,6 +39,11 @@ public class Token {
         this.line = line;
         this.collumn = collumn;
 
+        if (lexem.equals("EOF")) {
+            type = "EOF";
+            return;
+        }
+
         // Verifica se o lexema está em tokentypes
         type = TOKENTYPES.get(lexem);
         if (type != null) {

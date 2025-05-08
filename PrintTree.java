@@ -44,6 +44,16 @@ public class PrintTree {
             System.out.printf("Expressão: %s%n", node.valor);
             printTree(node.left, nivel+4);
             printTree(node.right, nivel+4);
+        } else if (node.tipo.equals("repeat")) {
+            printSpaces(nivel);
+            System.out.println("Repetição Controlada:");
+            printSpaces(nivel+4);
+            System.out.printf("Controle: %s%n", node.nome);
+            printSpaces(nivel+4);
+            System.out.println("Intervalo:");
+            printTree(node.left, nivel+8);
+            printTree(node.right, nivel+8);
+            printTree(node.block, nivel+4);
         }
     }
 
