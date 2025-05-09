@@ -1,3 +1,4 @@
+package src;
 import java.util.ArrayList;
 
 
@@ -70,6 +71,15 @@ public class Lexer {
                 else {
                     System.out.printf("Caractere invalido '|' na linha %d%n", line);
                     continue;
+                }
+            }
+            // Verifica o simbolo ->
+            else if (c == '-') {
+                buffer = Character.toString(c);
+                eat();
+                if (c == '>') {
+                    buffer += c;
+                    eat();
                 }
             }
             // Verifica caracteres literais
@@ -148,7 +158,7 @@ public class Lexer {
 
     private void tokenizeWords() {
         // Enquanto o caractere for uma letra, numero ou _ e não for vazio, adiciona o caractere no buffer
-        while ((c != '\0' && Utils.isAlphaNum(c)) || c == '_') {
+        while ((c != '\0' && Character.isLetterOrDigit(c)) || c == '_') {
             buffer += c;
             eat();
         }

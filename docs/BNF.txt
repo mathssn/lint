@@ -2,16 +2,16 @@
 
 <block> ::= "{" { <statement> } "}"
 
-<statement> ::= <declaration> | <assignment> | <ifStmt> | <repeatStmt> | <loopStmt> | "return" <expr> ";" | "break;" | "continue;" | <expr> ";" 
+<statement> ::= <declaration> | <assignment> | <ifStmt> | <repeatStmt> | <whileStmt> | "return" <expr> ";" | "stop;" | "skip;" | <expr> ";" 
 
 <declaration> ::= "var" <var> <declaration_sulf>";"
 <declaration_sulf> ::= ":" <type> "=" <expr> | ":" <type> | "=" <expr>
 <assignment> ::= <var> "=" <expr> ";"
 <ifStmt> ::= "if" "(" <logicExpr> ")" <block> { "else if" "(" <logicExpr> ")" <block>} [ "else" <block> ]
-<repeatStmt> ::= "repeat" "(" "var" <var>";" <expr> "to" <expr>")" <block> | "repeat" "(" "var" <var> ":" "int" from <int> "to" <int>" "step" <int>)" <block>
-<loopStmt> ::= "loop" "if" "(" <logicExpr> ")" <block>
+<repeatStmt> ::= "repeat" "(" "var" <var>";" <expr> "to" <expr> [ ";" "step" <expr>] ")" <block>
+<whileStmt> ::= "repeat" "while" "(" <logicExpr> ")" <block>
 
-<function> ::= "func" <word>"("[ <param> {"," <param>} ]"):" ( <type> | "void" ) <block>
+<function> ::= "func" <word>"("[ <param> {"," <param>} ]") "->" ( <type> | "void" ) <block>
 <param> ::= <var> ":" <type>
 
 <type> ::= "int" | "float" | "bool" | "char"
