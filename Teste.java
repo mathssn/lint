@@ -5,12 +5,12 @@ import java.util.ArrayList;
 import src.Lexer;
 import src.Parser;
 import src.ast.Node;
-
+import src.semantic.*;
 
 public class Teste {
 
     public static void main(String[] args) {
-        Lexer lexer = new Lexer("func main() -> void {var x = 10; var y = 2} func soma(a: int, b: int) -> int {return a+b;}");
+        Lexer lexer = new Lexer("func main() -> void {'a'+True;}");
         lexer.tokenize();
 
         // try {
@@ -29,6 +29,8 @@ public class Teste {
         for (Node node: tree) {
             PrintTree.printTree(node, 0);
         }
+        
+        TypeChecker.typeChecker(tree);
     }
 
 }

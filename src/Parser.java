@@ -1,10 +1,11 @@
 package src;
 import java.util.ArrayList;
 import java.util.Set;
-// import java.util.HashMap;
+import java.util.HashMap;
 
 import src.ast.Node;
 import src.ast.NodeType;
+import src.utils.*;
 
 public class Parser {
 
@@ -12,7 +13,7 @@ public class Parser {
     public ArrayList<Node> nodes = new ArrayList<Node>();
     private int index = 0;
     private Token token; // Guarda o token atual
-    // public HashMap<String, Symbol> symbolTable = new HashMap<String, Symbol>();
+    public HashMap<String, Symbol> symbolTable = new HashMap<String, Symbol>();
 
     public static Set<String> tipos = Set.of("int", "char", "bool", "float");
     public static Set<TokenType> logicOperators = Set.of(TokenType.GREATER_OP, TokenType.LESS_OP, TokenType.EQUAL_OP, TokenType.GREATER_EQUAL_OP, TokenType.LESS_EQUAL_OP);
@@ -122,6 +123,8 @@ public class Parser {
                 throw new RuntimeException(String.format("Erro proximo a linha %d: Esperado ';' ao final da atribuição", line));
             }
 
+            symbolTable.put(ident.lexem, new Symbol(null, null));
+
             return new Node(NodeType.DECL, null, ident.lexem, null, rightNode, null);
         }
 
@@ -139,6 +142,7 @@ public class Parser {
         // Armazena o tipo
         tipo = token;
         eat();
+        symbolTable.put(ident.lexem, new Symbol(tipo.lexem, null));
         
         // Verifica se após o tipo foi colocado ';', ex.: 'var x: int;'
         if (token.type == TokenType.SEMI_COL) {
@@ -438,6 +442,7 @@ public class Parser {
         }
         int line = token.line; // Armazena a linha atual
         Token ident;
+        Token tipo;
         Node params = null;
 
         if (token.type != TokenType.KEYWORD  && !token.lexem.equals("func")) {
@@ -468,7 +473,10 @@ public class Parser {
 
         if (!tipos.contains(token.lexem) && !token.lexem.equals("void")) {
             throw new RuntimeException(String.format("Erro proximo a linha %d: Esperado um tipo após '->'", line));
-        } eat();
+        }
+        tipo = token;
+        eat();
+        symbolTable.put(ident.lexem, new Symbol(tipo.lexem, null));
 
         if (token.type != TokenType.LEFT_BRACE) {
             throw new RuntimeException(String.format("Erro proximo a linha %d: Esperado '{' no inicio do bloco", line));
