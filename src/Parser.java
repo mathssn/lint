@@ -438,6 +438,7 @@ public class Parser {
         }
         int line = token.line; // Armazena a linha atual
         Token ident;
+        Node params = null;
 
         if (token.type != TokenType.KEYWORD  && !token.lexem.equals("func")) {
             throw new RuntimeException(String.format("Erro proximo a linha %d: Esperado 'func'", line));
@@ -452,6 +453,10 @@ public class Parser {
         if (token.type != TokenType.LEFT_PAREN) {
             throw new RuntimeException(String.format("Erro proximo a linha %d: Esperado '(' após o identificador", line));
         } eat();
+
+        if (token.type == TokenType.IDENT) {
+            params = parseParams();
+        }
 
         if (token.type != TokenType.RIGHT_PAREN) {
             throw new RuntimeException(String.format("Erro proximo a linha %d: Esperado ')'", line));
@@ -475,7 +480,58 @@ public class Parser {
             throw new RuntimeException(String.format("Erro proximo a linha %d: Esperado '}' ao final do bloco", line));
         } eat();
 
-        return new Node(NodeType.FUNC, null, ident.lexem, null, null, block);
+        return new Node(NodeType.FUNC, null, ident.lexem, params, null, block);
+    }
+
+    private Node parseParams() {
+        if (token.type == TokenType.EOF) {
+            throw new RuntimeException("Erro: Esperado um identificador");
+        }
+        int line = token.line;
+
+        ArrayList<Node> params = new ArrayList<Node>();
+
+        while (token.type != TokenType.EOF && token.type == TokenType.IDENT) {
+            Node param = parseParam();
+            
+            if (token.type == TokenType.COMMA) {
+                eat();
+                if (token.type != TokenType.IDENT) {
+                    throw new RuntimeException(String.format("Erro proximo a linha %d: Esperado um parametro após ','", line));
+                }
+            }
+
+            params.add(param);
+        }
+
+        return new Node(NodeType.PARAMS, null, null, null, null, params);
+    }
+
+    private Node parseParam() {
+        if (token.type == TokenType.EOF) {
+            throw new RuntimeException("Erro: Esperado um identificador");
+        }
+        int line = token.line;
+        Token ident;
+        Token tipo;
+
+        if (token.type != TokenType.IDENT) {
+            throw new RuntimeException(String.format("Erro proximo a linha %d: Esperado um identificador como parametro", line));
+        } 
+        ident = token;
+        eat();
+
+        if (token.type != TokenType.COLON) {
+            throw new RuntimeException(String.format("Erro proximo a linha %d: Esperado um ':' após o identificador", line));
+        } eat();
+
+        if (token.type != TokenType.KEYWORD || !tipos.contains(token.lexem)) {
+            throw new RuntimeException(String.format("Erro proximo a linha %d: Tipo do parametro não definido", line));
+        } 
+        tipo = token;
+        eat();
+
+        return new Node(NodeType.PARAM, null, ident.lexem, null, null, null);
     }
     
     public Node parseExpr() {

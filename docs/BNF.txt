@@ -11,13 +11,14 @@
 <repeatStmt> ::= "repeat" "(" "var" <var>";" <expr> "to" <expr> [ ";" "step" <expr>] ")" <block>
 <whileStmt> ::= "repeat" "while" "(" <logicExpr> ")" <block>
 
-<function> ::= "func" <word>"("[ <param> {"," <param>} ]") "->" ( <type> | "void" ) <block>
+<function> ::= "func" <word>"(" <params> ") "->" ( <type> | "void" ) <block>
 <param> ::= <var> ":" <type>
+<params> ::= [ <param> {"," <param>} ]
 
 <type> ::= "int" | "float" | "bool" | "char"
 
 <class> ::= "class" <word> "{" { <declaration> | <function> | <constructor> } "}"
-<constructor> = "_new" "("[ <param> {"," <param>} ]")" <block>
+<constructor> = "_new" "(" <params> ")" <block>
 
 <logicExpr> ::= <logicTerm> {("&&" | "||") <logicTerm>}
 <logicTerm> ::= <expr> <logicOperator> <expr> | <bool> 

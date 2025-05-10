@@ -11,5 +11,8 @@ public enum NodeType {
     IDENT,
     
     // Literais
-    INT, CHAR, FLOAT, BOOL, NULL
+    INT, CHAR, FLOAT, BOOL, NULL,
+
+    // Outros
+    PARAMS, PARAM
 }

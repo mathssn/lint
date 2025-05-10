@@ -10,7 +10,7 @@ import src.ast.Node;
 public class Teste {
 
     public static void main(String[] args) {
-        Lexer lexer = new Lexer("func main() -> int {var x: int = 9;}");
+        Lexer lexer = new Lexer("func main() -> void {var x = 10; var y = 2} func soma(a: int, b: int) -> int {return a+b;}");
         lexer.tokenize();
 
         // try {
@@ -30,5 +30,6 @@ public class Teste {
             PrintTree.printTree(node, 0);
         }
     }
-    
+
 }
+

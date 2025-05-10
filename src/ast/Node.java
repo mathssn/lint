@@ -6,15 +6,15 @@ public class Node {
 
     public String nome;
     public String valor;
-    public NodeType tipo;
+    public NodeType type;
     public Node left;
     public Node right;
     public ArrayList<Node> block;
 
-    public Node(NodeType tipo, String valor, String nome, Node left, Node right, ArrayList<Node> block) {
+    public Node(NodeType type, String valor, String nome, Node left, Node right, ArrayList<Node> block) {
         this.nome = nome;
         this.valor = valor;
-        this.tipo = tipo;
+        this.type = type;
         this.left = left;
         this.right = right;
         this.block = block;
