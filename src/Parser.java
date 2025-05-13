@@ -123,7 +123,7 @@ public class Parser {
                 throw new RuntimeException(String.format("Erro proximo a linha %d: Esperado ';' ao final da atribuição", line));
             }
 
-            symbolTable.put(ident.lexem, new Symbol(null, null));
+            symbolTable.put(ident.lexem, null);
 
             return new Node(NodeType.DECL, null, ident.lexem, null, rightNode, null);
         }
@@ -142,7 +142,7 @@ public class Parser {
         // Armazena o tipo
         tipo = token;
         eat();
-        symbolTable.put(ident.lexem, new Symbol(tipo.lexem, null));
+        symbolTable.put(ident.lexem, new Symbol(tipo.lexem, null, false, false));
         
         // Verifica se após o tipo foi colocado ';', ex.: 'var x: int;'
         if (token.type == TokenType.SEMI_COL) {
@@ -156,6 +156,7 @@ public class Parser {
         eat();
 
         Node rightNode = parseExpr();
+        symbolTable.get(ident.lexem).initialized = true;
 
         // Verifica se ';' foi colocado após a expressão
          if (token.type != TokenType.SEMI_COL) {
@@ -476,7 +477,7 @@ public class Parser {
         }
         tipo = token;
         eat();
-        symbolTable.put(ident.lexem, new Symbol(tipo.lexem, null));
+        symbolTable.put(ident.lexem, new Symbol(tipo.lexem, null, false, false));
 
         if (token.type != TokenType.LEFT_BRACE) {
             throw new RuntimeException(String.format("Erro proximo a linha %d: Esperado '{' no inicio do bloco", line));
