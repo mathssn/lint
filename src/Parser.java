@@ -1,11 +1,9 @@
 package src;
 import java.util.ArrayList;
 import java.util.Set;
-import java.util.HashMap;
 
 import src.ast.Node;
 import src.ast.NodeType;
-import src.utils.*;
 
 public class Parser {
 
@@ -13,7 +11,6 @@ public class Parser {
     public ArrayList<Node> nodes = new ArrayList<Node>();
     private int index = 0;
     private Token token; // Guarda o token atual
-    public HashMap<String, Symbol> symbolTable = new HashMap<String, Symbol>();
 
     public static Set<String> tipos = Set.of("int", "char", "bool", "float");
     public static Set<TokenType> logicOperators = Set.of(TokenType.GREATER_OP, TokenType.LESS_OP, TokenType.EQUAL_OP, TokenType.GREATER_EQUAL_OP, TokenType.LESS_EQUAL_OP);
@@ -37,7 +34,7 @@ public class Parser {
         }
     }
 
-    public ArrayList<Node> parseBlock() {
+    private ArrayList<Node> parseBlock() {
         // Faz o parse de um bloco
         if (token.type == TokenType.EOF) {
             throw new RuntimeException("Erro!");
@@ -89,14 +86,13 @@ public class Parser {
         return nodes;
     }
 
-    public Node parseDeclaration() { // Faz o parse de uma declaração de variavel
+    private Node parseDeclaration() { // Faz o parse de uma declaração de variavel
         // Verifica se há um token
         if (token.type == TokenType.EOF) {
             throw new RuntimeException("Erro: Esperado a palavra chave 'var' para declaração");
         }
         int line = token.line; // Armazena a linha atual
         Token ident; // Token do nome da variavel
-        Token tipo; // Token do tipo da variavel
 
         // Verifica se a palavra-chave 'var' foi colocada
         if (token.type != TokenType.KEYWORD  || !token.lexem.equals("var")) {
@@ -123,8 +119,6 @@ public class Parser {
                 throw new RuntimeException(String.format("Erro proximo a linha %d: Esperado ';' ao final da atribuição", line));
             }
 
-            symbolTable.put(ident.lexem, null);
-
             return new Node(NodeType.DECL, null, ident.lexem, null, rightNode, null);
         }
 
@@ -138,11 +132,7 @@ public class Parser {
         if (token.type != TokenType.KEYWORD  || !tipos.contains(token.lexem)) {
             throw new RuntimeException(String.format("Erro proximo a linha %d: Esperado um tipo após ':'", line));
         }
-
-        // Armazena o tipo
-        tipo = token;
         eat();
-        symbolTable.put(ident.lexem, new Symbol(tipo.lexem, null, false, false));
         
         // Verifica se após o tipo foi colocado ';', ex.: 'var x: int;'
         if (token.type == TokenType.SEMI_COL) {
@@ -156,7 +146,6 @@ public class Parser {
         eat();
 
         Node rightNode = parseExpr();
-        symbolTable.get(ident.lexem).initialized = true;
 
         // Verifica se ';' foi colocado após a expressão
          if (token.type != TokenType.SEMI_COL) {
@@ -167,7 +156,7 @@ public class Parser {
         return new Node(NodeType.DECL, null, ident.lexem, null, rightNode, null);
     }
     
-    public Node parseAssignment() {
+    private Node parseAssignment() {
         // Verifica se há um token
         if (token.type == TokenType.EOF) {
             throw new RuntimeException("Erro: Esperado um identificador para atribuição");
@@ -199,7 +188,7 @@ public class Parser {
         return new Node(NodeType.ATRIB, null, ident.lexem, null, rightNode, null);
     }
 
-    public Node parseIfStmt() {
+    private Node parseIfStmt() {
         // Verifica se há um token
         if (token.type == TokenType.EOF) {
             throw new RuntimeException("Erro: Esperado 'if'");
@@ -233,7 +222,7 @@ public class Parser {
         return new Node(NodeType.CONDITIONAL, null, null, logicExpr, null, block);
     }
 
-    public Node parseLogicExpr() {
+    private Node parseLogicExpr() {
         if (token.type == TokenType.EOF) {
             throw new RuntimeException("Erro: Esperado uma expressão logica após '('");
         }
@@ -251,7 +240,7 @@ public class Parser {
         return leftNode;
     }
 
-    public Node parseLogicTerm() {
+    private Node parseLogicTerm() {
         if (token.type == TokenType.EOF) {
             throw new RuntimeException("Erro: Esperado uma expressão logica após '('");
         }
@@ -268,7 +257,7 @@ public class Parser {
         return leftNode;
     }
 
-    public Node parseRepeatStmt() {
+    private Node parseRepeatStmt() {
         // Verifica se há um token
         if (token.type == TokenType.EOF) {
             throw new RuntimeException("Erro: Esperado um palavra-chave 'repeat'");
@@ -346,7 +335,7 @@ public class Parser {
         return new Node(NodeType.REPEAT, null, ident.lexem, init, step, block);
     }
 
-    public Node parseWhileStmt() {
+    private Node parseWhileStmt() {
         // Verifica se há um token
         if (token.type == TokenType.EOF) {
             throw new RuntimeException("Erro: Esperado um palavra-chave 'while'");
@@ -380,7 +369,7 @@ public class Parser {
         return new Node(NodeType.WHILE, null, null, logicExpr, null, block);
     }
 
-    public Node parseReturnStmt() {
+    private Node parseReturnStmt() {
         // Verifica se há um token
         if (token.type == TokenType.EOF) {
             throw new RuntimeException("Erro: Esperado um palavra-chave 'while'");
@@ -400,7 +389,7 @@ public class Parser {
         return new Node(NodeType.RETURN, null, null, expr, null, null);
     }
 
-    public Node parseStopStmt() {
+    private Node parseStopStmt() {
         // Verifica se há um token
         if (token.type == TokenType.EOF) {
             throw new RuntimeException("Erro: Esperado um palavra-chave 'stop'");
@@ -418,8 +407,7 @@ public class Parser {
         return new Node(NodeType.STOP, null, null, null, null, null);
     }
 
-    
-    public Node parseSkipStmt() {
+    private Node parseSkipStmt() {
         // Verifica se há um token
         if (token.type == TokenType.EOF) {
             throw new RuntimeException("Erro: Esperado um palavra-chave 'skip'");
@@ -437,13 +425,12 @@ public class Parser {
         return new Node(NodeType.SKIP, null, null, null, null, null);
     }
 
-    public Node parseFunc() {
+    private Node parseFunc() {
         if (token.type == TokenType.EOF) {
             throw new RuntimeException("Erro: Esperado um palavra-chave 'func'");
         }
         int line = token.line; // Armazena a linha atual
         Token ident;
-        Token tipo;
         Node params = null;
 
         if (token.type != TokenType.KEYWORD  && !token.lexem.equals("func")) {
@@ -474,10 +461,7 @@ public class Parser {
 
         if (!tipos.contains(token.lexem) && !token.lexem.equals("void")) {
             throw new RuntimeException(String.format("Erro proximo a linha %d: Esperado um tipo após '->'", line));
-        }
-        tipo = token;
-        eat();
-        symbolTable.put(ident.lexem, new Symbol(tipo.lexem, null, false, false));
+        } eat();
 
         if (token.type != TokenType.LEFT_BRACE) {
             throw new RuntimeException(String.format("Erro proximo a linha %d: Esperado '{' no inicio do bloco", line));
@@ -522,7 +506,6 @@ public class Parser {
         }
         int line = token.line;
         Token ident;
-        Token tipo;
 
         if (token.type != TokenType.IDENT) {
             throw new RuntimeException(String.format("Erro proximo a linha %d: Esperado um identificador como parametro", line));
@@ -536,14 +519,12 @@ public class Parser {
 
         if (token.type != TokenType.KEYWORD || !tipos.contains(token.lexem)) {
             throw new RuntimeException(String.format("Erro proximo a linha %d: Tipo do parametro não definido", line));
-        } 
-        tipo = token;
-        eat();
+        } eat();
 
         return new Node(NodeType.PARAM, null, ident.lexem, null, null, null);
     }
     
-    public Node parseExpr() {
+    private Node parseExpr() {
         // Faz o parse de uma expressão
         Node leftNode = parseTerm(); // Faz o parse do lado esquerdo do sinal
 
@@ -558,7 +539,7 @@ public class Parser {
         return leftNode;
     }
 
-    public Node parseTerm() {
+    private Node parseTerm() {
         // Faz o parse de um termo
         Node leftNode = parseFactor(); // Faz o parse do lado esquerdo do sinal
         while (token.type == TokenType.MULT_OP || token.type == TokenType.DIV_OP) {
@@ -572,7 +553,7 @@ public class Parser {
         return leftNode;
     }
 
-    public Node parseFactor() {
+    private Node parseFactor() {
         // Verifica se há um token, se não, lança um erro
         if (token.type == TokenType.EOF) {
             throw new RuntimeException(String.format("Erro desconhecido!"));
@@ -650,14 +631,14 @@ public class Parser {
         throw new RuntimeException(String.format("Erro proximo a linha %d: Esperado um numero, identificador, parenteses ou caractere, mas nenhum foi encontrado%n", line));
     }
 
-    public Token peek() {
+    private Token peek() {
         if (index < tokens.size()) {
             return tokens.get(index);
         }
         return new Token("EOF", 0, 0);
     }
 
-    public void eat() {
+    private void eat() {
         index++;
         token = peek();
     }

@@ -10,7 +10,7 @@ import src.semantic.*;
 public class Teste {
 
     public static void main(String[] args) {
-        Lexer lexer = new Lexer("func main() -> void {var x: int = 9; var y = x + 8;}");
+        Lexer lexer = new Lexer("func main() -> void {var x: float = 9.1; x = 10;}");
         lexer.tokenize();
 
         // try {
@@ -30,7 +30,6 @@ public class Teste {
             PrintTree.printTree(node, 0);
         }
         
-        TypeChecker.setSymbolTable(parser.symbolTable);
         TypeChecker.typeChecker(tree);
     }
 

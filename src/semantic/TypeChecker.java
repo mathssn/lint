@@ -82,10 +82,29 @@ public class TypeChecker {
                 if (right.equals("int") && symbolTable.get(node.nome).type.equals("float")) {    
                     return "float";
                 }
-                throw new RuntimeException(String.format("Declaração invalida: variavel do tipo %s não pode receber valores do tipo %s", symbolTable.get(node.nome), right));
+                throw new RuntimeException(String.format("Declaração invalida: variavel do tipo %s não pode receber valores do tipo %s", symbolTable.get(node.nome).type, right));
             }
 
             return right;
+        }
+
+        else if (node.type == NodeType.ATRIB) {
+            if (!symbolTable.keySet().contains(node.nome)) {
+                throw new RuntimeException(String.format("Atribuição a variavel não declarada %s", node.nome));
+            }
+
+            String right = typeChecker(node.right);
+
+            if (!right.equals(symbolTable.get(node.nome).type)) {
+                if (right.equals("int") && symbolTable.get(node.nome).type.equals("float")) {    
+                    return "float";
+                }
+                throw new RuntimeException(String.format("Atribuição invalida: variavel do tipo %s não pode receber valores do tipo %s", symbolTable.get(node.nome).type, right));
+            }
+        }
+
+        else if (node.type == NodeType.REPEAT) {
+            
         }
 
         // Verifica se é uma função
