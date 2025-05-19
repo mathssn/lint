@@ -68,7 +68,7 @@ public class TypeChecker {
                     throw new RuntimeException(String.format("Declaração de variavel invalida: %s", node.nome));
                 }
                 
-                symbolTable.put(node.nome, new Symbol(right, null, true, false));
+                // symbolTable.put(node.nome, new Symbol(right, null, true, false));
                 return right;
             }
 

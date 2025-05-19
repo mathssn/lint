@@ -11,19 +11,46 @@ public class Lexer {
     private String buffer = "";
     private char c; // Guarda o caractere atual
     public ArrayList<Token> tokens = new ArrayList<Token>(); // Lista de tokens
+    public ArrayList<Integer> indentations = new ArrayList<Integer>();
+
 
     public Lexer(String program) {
         this.program = program.toCharArray();
-        c = this.program[index];
+        indentations.add(0);
     }
 
     public void tokenize() {
+        c = peek();
         while (c != '\0') {
+            // Verifica se ja existe algum token na lista
+            if (tokens.size() > 0 && tokens.get(tokens.size() - 1).type == TokenType.NEWLINE) {
+                // Verifica se o ultimo token foi uma quebra de linha e o caractere é um espaço
+                if (c == ' ') {
+                    // tokeniza a indentação
+                    tokenizeSpaces();
+                }
+                else if (c == '\n') {
+                    addToken(new Token("", TokenType.NEWLINE, line, collumn));
+                    eat();
+                    continue;
+                }
+                // Verifica se o ultimo token foi uma quebra de linha e o caractere não é um espaço
+                else {
+                    // Retira todas as indetações e volta para o nivel 0
+                    while (indentations.size() > 1) {
+                        addToken(new Token("", TokenType.DEDENT, line, collumn));
+                        indentations.remove(indentations.size() - 1);
+                    }
+                }
+
+                if (c == '\0') {
+                    continue;
+                }
+            }
+
             // Verifica se é uma quebra de linha
             if (c == '\n') {
-                eat();
-                collumn = 1;
-                line++;
+                tokenizeNewLine();
                 continue;
             }
             // Verifica se é um espaço em branco
@@ -111,7 +138,7 @@ public class Lexer {
                         eat();
                         break;
                     default:
-                        System.out.printf("Caractere invalido %s%n", c);
+                        System.out.printf("Caractere invalido: %s%n", (int) c);
                         eat();
                         continue;
                 }
@@ -121,6 +148,11 @@ public class Lexer {
             Token newToken = new Token(buffer, line, collumn - buffer.length());
             addToken(newToken);
         }
+        while (indentations.size() > 1) {
+            addToken(new Token("", TokenType.DEDENT, line, collumn));
+            indentations.remove(indentations.size() - 1);
+        }
+        addToken(new Token("EOF", TokenType.EOF, line, collumn));
     }
 
     private char peek() {
@@ -162,6 +194,34 @@ public class Lexer {
             buffer += c;
             eat();
         }
+    }
+
+    private void tokenizeSpaces() {
+        int spaces = 0;
+        while (c == ' ' && tokens.get(tokens.size() - 1).type == TokenType.NEWLINE) {
+            spaces++;
+            eat();
+        }
+
+        if (c != '\n') {
+            if (spaces > indentations.get(indentations.size() - 1)) {
+                addToken(new Token("", TokenType.INDENT, line, collumn));
+                indentations.add(spaces);
+            }
+            else if (spaces < indentations.get(indentations.size() - 1)) {
+                while (spaces < indentations.get(indentations.size() - 1)) {
+                    addToken(new Token("", TokenType.DEDENT, line, collumn));
+                    indentations.remove(indentations.size() - 1);
+                }
+            }
+        }
+    }
+
+    private void tokenizeNewLine() {
+        addToken(new Token("", TokenType.NEWLINE, line, collumn));
+        eat();
+        collumn = 1;
+        line++;
     }
 
     private void addToken(Token newToken) {

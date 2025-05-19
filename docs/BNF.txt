@@ -1,44 +1,70 @@
 <start> ::= { <function> | <class> }
 
-<block> ::= "{" { <statement> } "}"
-
-<statement> ::= <declaration> | <assignment> | <ifStmt> | <repeatStmt> | <whileStmt> | "return" <expr> ";" | "stop;" | "skip;" | <expr> ";" 
-
-<declaration> ::= "var" <var> <declaration_sulf>";"
-<declaration_sulf> ::= ":" <type> "=" <expr> | ":" <type> | "=" <expr>
-<assignment> ::= <var> "=" <expr> ";"
-<ifStmt> ::= "if" "(" <logicExpr> ")" <block> { "else if" "(" <logicExpr> ")" <block>} [ "else" <block> ]
-<repeatStmt> ::= "repeat" "(" "var" <var>";" <expr> "to" <expr> [ ";" "step" <expr>] ")" <block>
-<whileStmt> ::= "repeat" "while" "(" <logicExpr> ")" <block>
-
-<function> ::= "func" <word>"(" <params> ") "->" ( <type> | "void" ) <block>
+<function> ::= "func" <word> "(" <params> ")" "->" ( <type> | "void" ) ":" <block>
 <param> ::= <var> ":" <type>
-<params> ::= [ <param> {"," <param>} ]
+<params> ::= [ <param> { "," <param> } ]
+
+<class> ::= "class" <word> ":" <blockClass>
+<blockClass> ::= { <indent> ( <declaration> | <function> | <constructor> ) }
+<constructor> ::= "func" "_new" "(" <params> ")" ":" <block>
+
+<block> ::= { <indent> <statement> }
+
+<statement> ::= <declaration> "\n"
+              | <assignment> "\n"
+              | <ifStmt> "\n"
+              | <repeatStmt> "\n"
+              | <whileStmt> "\n"
+              | "return" <expr> "\n"
+              | "stop" "\n"
+              | "skip" "\n"
+              | <expr> "\n"
+
+<declaration> ::= "var" <var> <declaration_sufix>
+<declaration_sufix> ::= ":" <type> "=" <expr>
+                      | ":" <type>
+                      | "=" <expr>
+
+<assignment> ::= <var> "=" <expr>
+
+<ifStmt> ::= "if" [ "(" ] <logicExpr> [ ")" ] ":" <block>
+             { "else if" [ "(" ] <logicExpr> [ ")" ] ":" <block> }
+             [ "else" ":" <block> ]
+
+<repeatStmt> ::= "repeat" [ "(" ] "var" <var> "from" <expr> "to" <expr> [ "step" <expr> ] [ ")" ] ":" <block>
+<whileStmt> ::= "while" [ "(" ] <logicExpr> [ ")" ] ":" <block>
+
+<logicExpr> ::= <logicTerm> { ( "&&" | "||" ) <logicTerm> }
+<logicTerm> ::= <expr> <logicOperator> <expr> | <bool>
+<logicOperator> ::= ">" | "<" | "==" | ">=" | "<="
+
+<expr> ::= <term> { ( "+" | "-" ) <term> }
+<term> ::= <factor> { ( "*" | "/" ) <factor> }
+<factor> ::= "(" <expr> ")"
+           | <int>
+           | <float>
+           | <bool>
+           | <charLiteral>
+           | "null"
+           | <var>
+           | "-" <factor>
+           | <functionCall>
+
+<functionCall> ::= <primary> "(" [ <expr> { "," <expr> } ] ")"
+<primary> ::= <var> | <functionCall> "." <var>
 
 <type> ::= "int" | "float" | "bool" | "char"
 
-<class> ::= "class" <word> "{" { <declaration> | <function> | <constructor> } "}"
-<constructor> = "_new" "(" <params> ")" <block>
-
-<logicExpr> ::= <logicTerm> {("&&" | "||") <logicTerm>}
-<logicTerm> ::= <expr> <logicOperator> <expr> | <bool> 
+<int> ::= <number>
+<float> ::= <int> "." <number>
+<bool> ::= "True" | "False"
+<charLiteral> ::= "'" <char> "'"
 
 <number> ::= <digit> { <digit> }
-<digit> ::= 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
-
-<int> ::= <number>
-<float> ::= <int>"."<number>
-<bool> ::= "True" | "False"
+<digit> ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
 
 <var> ::= <word>
 <word> ::= <char> { <char> | <digit> }
 <char> ::= "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z" | "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z" | "_"
-<charLiteral> ::= "'" <char> "'"
 
-<logicOperator> ::= ">" | "<" | "==" | ">=" | "<=" 
-
-<expr> ::= <term> { (+ | -) <term> }
-<term> ::= <factor> { (* | /) <factor> }
-<factor> ::= (<expr>) | <int> | <float> | <bool> | <charLiteral> | "null" | <var> | -<factor> | <functionCall>
-
-<functionCall> ::= <var> "(" [ <expr> {"," <expr> }] ")" | <var> "." <var> "(" [ <expr> {"," <expr> }] ")"
+<indent> ::= { " " } | "\t"

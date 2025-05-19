@@ -31,6 +31,9 @@ public class Parser {
                 Node newNode = parseFunc();
                 nodes.add(newNode);
             }
+            else if (token.type == TokenType.NEWLINE) {
+                eat();
+            }
         }
     }
 
@@ -41,7 +44,7 @@ public class Parser {
         }
 
         ArrayList<Node> nodes = new ArrayList<Node>();
-        while (token.type != TokenType.EOF && token.type != TokenType.RIGHT_BRACE) {
+        while (token.type != TokenType.EOF && token.type != TokenType.DEDENT) {
             if (token.type == TokenType.KEYWORD && token.lexem.equals("var")) {
                 Node newNode = parseDeclaration();
                 nodes.add(newNode);
@@ -70,17 +73,21 @@ public class Parser {
                 Node newNode = parseSkipStmt();
                 nodes.add(newNode);
             }
+            else if (token.type == TokenType.NEWLINE) {
+                eat();
+            }
             else {
                 int line = token.line;
                 Node newNode = parseExpr();
 
-                if (token.type == TokenType.SEMI_COL) {
+                if (token.type == TokenType.NEWLINE) {
                     eat();
                     nodes.add(newNode);
                 } else {
-                    throw new RuntimeException(String.format("Erro proximo a linha %d: Esperado ';' ao fim de uma expressaõ", line));
+                    throw new RuntimeException(String.format("Erro proximo a linha %d: Esperado nova linha", line));
                 }
             }
+
         }
 
         return nodes;
@@ -95,7 +102,7 @@ public class Parser {
         Token ident; // Token do nome da variavel
 
         // Verifica se a palavra-chave 'var' foi colocada
-        if (token.type != TokenType.KEYWORD  || !token.lexem.equals("var")) {
+        if (token.type != TokenType.KEYWORD || !token.lexem.equals("var")) {
             throw new RuntimeException(String.format("Erro proximo a linha %d: Esperado a palavra-chave 'var' para declaração", line));
         }
         eat();
@@ -113,13 +120,13 @@ public class Parser {
             Node rightNode = parseExpr();
 
             // Verifica se ';' foi colocado corretamente
-            if (token.type == TokenType.SEMI_COL) {
+            if (token.type == TokenType.NEWLINE) {
                 eat();
             } else {
                 throw new RuntimeException(String.format("Erro proximo a linha %d: Esperado ';' ao final da atribuição", line));
             }
 
-            return new Node(NodeType.DECL, null, ident.lexem, null, rightNode, null);
+            return new Node(NodeType.DECL, null, ident.lexem, null, rightNode, null, line);
         }
 
         // Verifica se ':' foi colocado após o identificador
@@ -134,10 +141,10 @@ public class Parser {
         }
         eat();
         
-        // Verifica se após o tipo foi colocado ';', ex.: 'var x: int;'
-        if (token.type == TokenType.SEMI_COL) {
+        // Verifica se após o tipo não existe mais nada 'var x: int'
+        if (token.type == TokenType.NEWLINE) {
             eat();
-            return new Node(NodeType.DECL, null, ident.lexem, null, null, null);
+            return new Node(NodeType.DECL, null, ident.lexem, null, null, null, line);
         }
         
         if (token.type != TokenType.ASSIGN_OP) {
@@ -148,12 +155,12 @@ public class Parser {
         Node rightNode = parseExpr();
 
         // Verifica se ';' foi colocado após a expressão
-         if (token.type != TokenType.SEMI_COL) {
-            throw new RuntimeException(String.format("Erro proximo a linha %d: Esperado ';' após a expressão", line));
+         if (token.type != TokenType.NEWLINE) {
+            throw new RuntimeException(String.format("Erro proximo a linha %d: Esperado uma nova linha", line));
         }
         eat();
 
-        return new Node(NodeType.DECL, null, ident.lexem, null, rightNode, null);
+        return new Node(NodeType.DECL, null, ident.lexem, null, rightNode, null, line);
     }
     
     private Node parseAssignment() {
@@ -180,12 +187,12 @@ public class Parser {
         // Faz o parse da expressão depois de '='
         Node rightNode = parseExpr();
 
-        if (token.type != TokenType.SEMI_COL) {
-            throw new RuntimeException(String.format("Erro proximo a linha %d: Esperado ';' ao fim da declaração", line));
+        if (token.type != TokenType.NEWLINE) {
+            throw new RuntimeException(String.format("Erro proximo a linha %d: Esperado nova linha", line));
         }
         eat();
 
-        return new Node(NodeType.ATRIB, null, ident.lexem, null, rightNode, null);
+        return new Node(NodeType.ATRIB, null, ident.lexem, null, rightNode, null, 0);
     }
 
     private Node parseIfStmt() {
@@ -219,7 +226,7 @@ public class Parser {
             throw new RuntimeException(String.format("Erro proximo a linha %d: Esperado '}' após o fim do bloco", line));
         } eat();
 
-        return new Node(NodeType.CONDITIONAL, null, null, logicExpr, null, block);
+        return new Node(NodeType.CONDITIONAL, null, null, logicExpr, null, block, 0);
     }
 
     private Node parseLogicExpr() {
@@ -234,7 +241,7 @@ public class Parser {
             eat();
             Node rightNode = parseLogicTerm();
 
-            leftNode = new Node(NodeType.LOGIC_OPERATOR, operator.lexem, null, leftNode, rightNode, null);
+            leftNode = new Node(NodeType.LOGIC_OPERATOR, operator.lexem, null, leftNode, rightNode, null, 0);
         }
 
         return leftNode;
@@ -251,7 +258,7 @@ public class Parser {
             Token operator = token;
             eat();
             Node rightNode = parseExpr();
-            return new Node(NodeType.LOGIC_OPERATOR, operator.lexem, null, leftNode, rightNode, null);
+            return new Node(NodeType.LOGIC_OPERATOR, operator.lexem, null, leftNode, rightNode, null, 0);
         }
 
         return leftNode;
@@ -309,7 +316,7 @@ public class Parser {
             eat();
 
             step = parseExpr();
-            step = new Node(NodeType.STEP, null, null, end, step, null);
+            step = new Node(NodeType.STEP, null, null, end, step, null, line);
         } else if (token.type == TokenType.KEYWORD && token.lexem.equals("step")) {
             throw new RuntimeException(String.format("Erro proximo a linha %d: Esperado ';' entre 'step' e o intervalo", line));
         }
@@ -329,10 +336,10 @@ public class Parser {
         } eat();
 
         if (step == null) {   
-            step = new Node(NodeType.STEP, null, null, end, new Node(NodeType.INT, "1", null, null, null, null), null);
+            step = new Node(NodeType.STEP, null, null, end, new Node(NodeType.INT, "1", null, null, null, null, line), null, line);
         }
 
-        return new Node(NodeType.REPEAT, null, ident.lexem, init, step, block);
+        return new Node(NodeType.REPEAT, null, ident.lexem, init, step, block, line);
     }
 
     private Node parseWhileStmt() {
@@ -366,7 +373,7 @@ public class Parser {
             throw new RuntimeException(String.format("Erro proximo a linha %d: Esperado '}' ao final do bloco", line));
         } eat();
 
-        return new Node(NodeType.WHILE, null, null, logicExpr, null, block);
+        return new Node(NodeType.WHILE, null, null, logicExpr, null, block, line);
     }
 
     private Node parseReturnStmt() {
@@ -382,11 +389,11 @@ public class Parser {
 
         Node expr = parseExpr();
 
-        if (token.type != TokenType.SEMI_COL) {
-            throw new RuntimeException(String.format("Erro proximo a linha %d: Esperado ';' após a expressão", line));
+        if (token.type != TokenType.NEWLINE) {
+            throw new RuntimeException(String.format("Erro proximo a linha %d: Esperado uma nova linha", line));
         } eat();
 
-        return new Node(NodeType.RETURN, null, null, expr, null, null);
+        return new Node(NodeType.RETURN, null, null, expr, null, null, line);
     }
 
     private Node parseStopStmt() {
@@ -404,7 +411,7 @@ public class Parser {
             throw new RuntimeException(String.format("Erro proximo a linha %d: Esperado ';' após 'stop'", line));
         } eat();
 
-        return new Node(NodeType.STOP, null, null, null, null, null);
+        return new Node(NodeType.STOP, null, null, null, null, null, line);
     }
 
     private Node parseSkipStmt() {
@@ -422,7 +429,7 @@ public class Parser {
             throw new RuntimeException(String.format("Erro proximo a linha %d: Esperado ';' após 'skip'", line));
         } eat();
         
-        return new Node(NodeType.SKIP, null, null, null, null, null);
+        return new Node(NodeType.SKIP, null, null, null, null, null, line);
     }
 
     private Node parseFunc() {
@@ -463,17 +470,25 @@ public class Parser {
             throw new RuntimeException(String.format("Erro proximo a linha %d: Esperado um tipo após '->'", line));
         } eat();
 
-        if (token.type != TokenType.LEFT_BRACE) {
-            throw new RuntimeException(String.format("Erro proximo a linha %d: Esperado '{' no inicio do bloco", line));
+        if (token.type != TokenType.COLON) {
+            throw new RuntimeException(String.format("Erro proximo a linha %d: Esperado ':' no inicio do bloco", line));
         } eat();
+
+        while (token.type == TokenType.NEWLINE) {
+            eat();
+        }
+
+        while (token.type == TokenType.INDENT) {
+            eat();
+        }
 
         ArrayList<Node> block = parseBlock();
 
-        if (token.type != TokenType.RIGHT_BRACE) {
-            throw new RuntimeException(String.format("Erro proximo a linha %d: Esperado '}' ao final do bloco", line));
+        if (token.type != TokenType.DEDENT) {
+            throw new RuntimeException(String.format("Erro de indentação proximo a linha %d", line));
         } eat();
 
-        return new Node(NodeType.FUNC, null, ident.lexem, params, null, block);
+        return new Node(NodeType.FUNC, null, ident.lexem, params, null, block, line);
     }
 
     private Node parseParams() {
@@ -497,7 +512,7 @@ public class Parser {
             params.add(param);
         }
 
-        return new Node(NodeType.PARAMS, null, null, null, null, params);
+        return new Node(NodeType.PARAMS, null, null, null, null, params, line);
     }
 
     private Node parseParam() {
@@ -521,7 +536,7 @@ public class Parser {
             throw new RuntimeException(String.format("Erro proximo a linha %d: Tipo do parametro não definido", line));
         } eat();
 
-        return new Node(NodeType.PARAM, null, ident.lexem, null, null, null);
+        return new Node(NodeType.PARAM, null, ident.lexem, null, null, null, line);
     }
     
     private Node parseExpr() {
@@ -534,7 +549,7 @@ public class Parser {
             eat();
             Node rightNode = parseTerm();
             // Cria um novo nó
-            leftNode = new Node(NodeType.BINARY_OPERATOR, operator.lexem, null, leftNode, rightNode, null);
+            leftNode = new Node(NodeType.BINARY_OPERATOR, operator.lexem, null, leftNode, rightNode, null, 0);
         }
         return leftNode;
     }
@@ -548,7 +563,7 @@ public class Parser {
             eat();
             Node rightNode = parseFactor();
             // Cria um novo nó
-            leftNode = new Node(NodeType.BINARY_OPERATOR, operator.lexem, null, leftNode, rightNode, null);
+            leftNode = new Node(NodeType.BINARY_OPERATOR, operator.lexem, null, leftNode, rightNode, null, 0);
         }
         return leftNode;
     }
@@ -567,7 +582,7 @@ public class Parser {
             // Verifica se apos o operador vem um inteiro, um float ou uma variavel
             if (token.type == TokenType.INT_LIT || token.type == TokenType.FLOAT || token.type == TokenType.IDENT) {
                 Node newNode = parseFactor();
-                return new Node(NodeType.UNARY_OPERATOR, "-", null, null, newNode, null);
+                return new Node(NodeType.UNARY_OPERATOR, "-", null, null, newNode, null, line);
             }
             throw new RuntimeException(String.format("Erro proximo a linha %d: Esperado um numero ou identificador após '-'%n", line));
         }
@@ -587,42 +602,42 @@ public class Parser {
 
         // Verifica se é um inteiro
         else if (token.type == TokenType.INT_LIT) {
-            Node newNode = new Node(NodeType.INT, token.lexem, null, null, null, null);
+            Node newNode = new Node(NodeType.INT, token.lexem, null, null, null, null, line);
             eat();
             return newNode;
         }
 
         // Verifica se é um caractere
         else if (token.type == TokenType.CHAR_LIT) {
-            Node newNode = new Node(NodeType.CHAR, token.lexem, null, null, null, null);
+            Node newNode = new Node(NodeType.CHAR, token.lexem, null, null, null, null, line);
             eat();
             return newNode;
         }
 
         // Verifica se é um float
         else if (token.type == TokenType.FLOAT) {
-            Node newNode = new Node(NodeType.FLOAT, token.lexem, null, null, null, null);
+            Node newNode = new Node(NodeType.FLOAT, token.lexem, null, null, null, null, line);
             eat();
             return newNode;
         }
 
         // Verifica se é um booleano
         else if (token.lexem.equals("True") || token.lexem.equals("False")) {
-            Node newNode = new Node(NodeType.BOOL, token.lexem, null, null, null, null);
+            Node newNode = new Node(NodeType.BOOL, token.lexem, null, null, null, null, line);
             eat();
             return newNode;
         }
 
         // Verifica se é um ponteiro nulo
         else if (token.lexem.equals("null")) {
-            Node newNode = new Node(NodeType.NULL, null, null, null, null, null);
+            Node newNode = new Node(NodeType.NULL, null, null, null, null, null, line);
             eat();
             return newNode;
         }
 
         // Verifica se é um identificador
         else if (token.type == TokenType.IDENT) {
-            Node newNode = new Node(NodeType.IDENT, null, token.lexem, null, null, null);
+            Node newNode = new Node(NodeType.IDENT, null, token.lexem, null, null, null, line);
             eat();
             return newNode;
         }

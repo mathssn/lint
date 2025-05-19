@@ -1,0 +1,53 @@
+NEWLINE -  - 1 - 1
+NEWLINE -  - 2 - 1
+KEYWORD - func - 2 - 2
+IDENT - main - 2 - 7
+LEFT_PAREN - ( - 2 - 11
+RIGHT_PAREN - ) - 2 - 12
+RIGHT_ARROW - -> - 2 - 14
+KEYWORD - void - 2 - 17
+COLON - : - 2 - 21
+NEWLINE -  - 2 - 22
+INDENT -  - 3 - 5
+KEYWORD - var - 3 - 5
+IDENT - x - 3 - 9
+COLON - : - 3 - 10
+KEYWORD - int - 3 - 12
+ASSIGN_OP - = - 3 - 16
+INT_LIT - 9 - 3 - 18
+NEWLINE -  - 3 - 19
+KEYWORD - var - 4 - 5
+IDENT - z - 4 - 9
+COLON - : - 4 - 10
+KEYWORD - int - 4 - 12
+NEWLINE -  - 4 - 15
+NEWLINE -  - 5 - 1
+IDENT - z - 5 - 6
+ASSIGN_OP - = - 5 - 8
+INT_LIT - 19 - 5 - 10
+NEWLINE -  - 5 - 12
+NEWLINE -  - 6 - 1
+DEDENT -  - 6 - 2
+KEYWORD - func - 6 - 2
+IDENT - soma - 6 - 7
+LEFT_PAREN - ( - 6 - 11
+IDENT - a - 6 - 12
+COLON - : - 6 - 13
+KEYWORD - int - 6 - 15
+COMMA - , - 6 - 18
+IDENT - b - 6 - 20
+COLON - : - 6 - 21
+KEYWORD - int - 6 - 23
+RIGHT_PAREN - ) - 6 - 26
+RIGHT_ARROW - -> - 6 - 28
+KEYWORD - int - 6 - 31
+COLON - : - 6 - 34
+NEWLINE -  - 6 - 35
+INDENT -  - 7 - 5
+KEYWORD - return - 7 - 5
+IDENT - a - 7 - 12
+SUM_OP - + - 7 - 14
+IDENT - b - 7 - 16
+NEWLINE -  - 7 - 17
+DEDENT -  - 8 - 1
+EOF - EOF - 8 - 1

@@ -13,6 +13,6 @@ public enum TokenType {
     KEYWORD, IDENT,
 
     // Outros
-    EOF
+    EOF, INDENT, DEDENT, NEWLINE
 
 }
